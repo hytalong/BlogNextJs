@@ -19,10 +19,11 @@ const components = {
   Head,
 };
 
-export default function PostPage({
-  posts,
-  globalData,
-}) {
+export default function PostPage({ posts, globalData }) {
+  if (!posts) {
+    return <p>Post não encontrado</p>; // Mensagem alternativa para casos inesperados
+  }
+
   return (
     <Layout>
       <SEO
@@ -40,9 +41,7 @@ export default function PostPage({
           )}
         </header>
         <main>
-          <article className="prose dark:prose-dark">
-            {posts.body}
-          </article>
+          <article className="prose dark:prose-dark">{posts.body}</article>
         </main>
       </article>
       <Footer copyrightText={globalData.footerText} />
@@ -58,10 +57,16 @@ export default function PostPage({
   );
 }
 
+
 export const getServerSideProps = async ({ params }) => {
   const globalData = getGlobalData();
   const posts = await getPostBySlug(params.id);
  
+  if (!posts || Object.keys(posts).length === 0) {
+    return {
+      notFound: true, // Retorna uma página 404 se o post não for encontrado
+    };
+  }
 
   return {
     props: {
